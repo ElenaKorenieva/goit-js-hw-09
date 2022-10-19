@@ -14,6 +14,8 @@ const refs = {
   hoursEl: document.querySelector('span[data-hours]'),
   minutesEl: document.querySelector('span[data-minutes]'),
   secondsEl: document.querySelector('span[data-seconds]'),
+  fieldEls: document.querySelectorAll('.field'),
+  valueEls: document.querySelectorAll('.value'),
 };
 
 // create object of parameters for flatpickr library
@@ -37,7 +39,7 @@ const options = {
 flatpickr(refs.input, options);
 refs.startBtn.disabled = true;
 
-// converts
+// converts time
 function convertMs(ms) {
   // Number of milliseconds per unit of time
   const second = 1000;
@@ -57,22 +59,36 @@ function convertMs(ms) {
   return { days, hours, minutes, seconds };
 }
 
+// add css styles to elements
+function beautifyCss() {
+  refs.timer.style.display = 'flex';
+
+  refs.fieldEls.forEach(fieldEl => {
+    fieldEl.style.display = 'flex';
+    fieldEl.style.flexDirection = 'column';
+    fieldEl.style.alignItems = 'center';
+    fieldEl.style.marginRight = '15px';
+    fieldEl.style.color = 'green';
+  });
+
+  refs.valueEls.forEach(valueEl => {
+    valueEl.style.fontSize = '30px';
+  });
+}
+
+// add zero to time value if it has only one digit in it
 function addLeadingZero(value) {
   return value.toString().padStart(2, '0');
 }
 
-refs.startBtn.addEventListener('click', onClickTimeCount);
-
+// callback function for eventListener
 function onClickTimeCount() {
   refs.startBtn.disabled = true;
 
   let timeCounter = setInterval(() => {
-    // console.log(Date(refs.input));
-    // console.log(Date(new Date()));
     let countDown = new Date(timeFromInput) - new Date();
-    console.log(countDown);
     let dateObj = convertMs(countDown);
-    // console.log(dateObj);
+
     if (countDown >= 0) {
       refs.daysEl.textContent = addLeadingZero(dateObj.days);
       refs.hoursEl.textContent = addLeadingZero(dateObj.hours);
@@ -86,3 +102,7 @@ function onClickTimeCount() {
     new Date(timeFromInput) - new Date()
   );
 }
+
+refs.startBtn.addEventListener('click', onClickTimeCount);
+
+beautifyCss();
