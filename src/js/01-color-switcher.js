@@ -14,7 +14,7 @@ function changeColor() {
   refs.startBtn.disabled = true;
   refs.stopBtn.disabled = false;
 
-  timeoutId = setTimeout(() => {
+  timeoutId = setInterval(() => {
     document.body.style.backgroundColor = getRandomHexColor();
   }, NOTIFICATION_DELAY);
 }
