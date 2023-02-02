@@ -1,15 +1,16 @@
+// Libraris import
 import flatpickr from 'flatpickr';
-// Additional import for flatpickr library
+// Addition styles import
 import 'flatpickr/dist/flatpickr.min.css';
-
 import Notiflix from 'notiflix';
 
+// variables
 let timeFromInput = null;
-// create object with selected elements
+
 const refs = {
-  input: document.querySelector('#datetime-picker'),
+  inputEl: document.querySelector('#datetime-picker'),
   startBtn: document.querySelector('button[data-start]'),
-  timer: document.querySelector('.timer'),
+  timerEl: document.querySelector('.timer'),
   daysEl: document.querySelector('span[data-days]'),
   hoursEl: document.querySelector('span[data-hours]'),
   minutesEl: document.querySelector('span[data-minutes]'),
@@ -18,28 +19,7 @@ const refs = {
   valueEls: document.querySelectorAll('.value'),
 };
 
-// create object of parameters for flatpickr library
-const options = {
-  enableTime: true,
-  time_24hr: true,
-  defaultDate: new Date(),
-  minuteIncrement: 1,
-  onClose(selectedDates) {
-    if (selectedDates[0] < new Date()) {
-      Notiflix.Notify.failure('Please choose a date in the future');
-      refs.startBtn.disabled = true;
-    } else {
-      refs.startBtn.disabled = false;
-      timeFromInput = selectedDates[0];
-    }
-  },
-};
-
-//Initialize input element with flatpickr
-flatpickr(refs.input, options);
-refs.startBtn.disabled = true;
-
-// converts time
+// function for time converting
 function convertMs(ms) {
   // Number of milliseconds per unit of time
   const second = 1000;
@@ -59,9 +39,31 @@ function convertMs(ms) {
   return { days, hours, minutes, seconds };
 }
 
-// add css styles to elements
-function beautifyCss() {
-  refs.timer.style.display = 'flex';
+// function for add zeroes in the date (for example our date is 2, but we need 02)
+function addLeadingZero(value) {
+  return value.toString().padStart(2, '0');
+}
+
+// parameters object for flatpickr function
+const options = {
+  enableTime: true,
+  time_24hr: true,
+  defaultDate: new Date(),
+  minuteIncrement: 1,
+  onClose(selectedDates) {
+    if (selectedDates[0] < new Date()) {
+      Notiflix.Notify.failure('Please choose a date in the future');
+      refs.startBtn.disabled = true;
+    } else {
+      refs.startBtn.disabled = false;
+      timeFromInput = selectedDates[0];
+    }
+  },
+};
+
+// function for adding css styles
+function beautify() {
+  refs.timerEl.style.display = 'flex';
 
   refs.fieldEls.forEach(fieldEl => {
     fieldEl.style.display = 'flex';
@@ -76,33 +78,34 @@ function beautifyCss() {
   });
 }
 
-// add zero to time value if it has only one digit in it
-function addLeadingZero(value) {
-  return value.toString().padStart(2, '0');
-}
+//create flatpickr instance
+flatpickr(refs.inputEl, options);
 
-// callback function for eventListener
-function onClickTimeCount() {
+// status of the button (for now the button is inactive)
+refs.startBtn.disabled = true;
+
+// click handler for event listener (out timer starts and shown in the page)
+function onStartButtonClick() {
   refs.startBtn.disabled = true;
 
-  let timeCounter = setInterval(() => {
-    let countDown = new Date(timeFromInput) - new Date();
-    let dateObj = convertMs(countDown);
+  let intervalId = setInterval(() => {
+    let dateDiff = new Date(timeFromInput) - new Date();
+    let countDate = convertMs(dateDiff);
 
-    if (countDown >= 0) {
-      refs.daysEl.textContent = addLeadingZero(dateObj.days);
-      refs.hoursEl.textContent = addLeadingZero(dateObj.hours);
-      refs.minutesEl.textContent = addLeadingZero(dateObj.minutes);
-      refs.secondsEl.textContent = addLeadingZero(dateObj.seconds);
+    if (dateDiff >= 0) {
+      refs.daysEl.textContent = addLeadingZero(countDate.days);
+      refs.hoursEl.textContent = addLeadingZero(countDate.hours);
+      refs.minutesEl.textContent = addLeadingZero(countDate.minutes);
+      refs.secondsEl.textContent = addLeadingZero(countDate.seconds);
+    } else {
+      Notiflix.Notify.success('Countdown finished');
+      clearInterval(intervalId);
     }
   }, 1000);
-  Notiflix.Notify.success('Countdown finished');
-  setTimeout(
-    () => clearInterval(timeCounter),
-    new Date(timeFromInput) - new Date()
-  );
 }
 
-refs.startBtn.addEventListener('click', onClickTimeCount);
+// add event listener to the DOM elements
+refs.startBtn.addEventListener('click', onStartButtonClick);
 
-beautifyCss();
+// apply styles to DOM elements
+beautify();
